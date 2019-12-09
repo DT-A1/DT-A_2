@@ -23,7 +23,7 @@ void Coding::updateFrequencies(char ch)
 }
 Coding::Node* Coding::generateHuffmanTree()
 {
-	priority_queue<Node*, vector<Node*>, compare> pQueue;
+	priority_queue<Node*, vector<Node*>, cmp> pQueue;
 	for (auto i = freqs.begin(); i != freqs.end(); i++)
 	{
 		pQueue.push(createNode(i->first, i->second, NULL, NULL));
@@ -50,9 +50,8 @@ void Coding::encode(Node* root, string code)
 	encode(root->right, code + "1");
 }
 
-unordered_map<char, string> Coding::getCodes()
+unordered_map<char, string> Coding::getCodes(Node* root)
 {
-	Node* root = generateHuffmanTree();
 	encode(root, "");
 
 	return codes;
