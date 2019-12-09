@@ -14,19 +14,19 @@ public:
 		Node* right;
 	};
 private:
-	struct compare
+	struct cmp
 	{
-		bool operator() (Node* a, Node* b) { return a->freq > b->freq; }
+		bool operator() (Node*& a, Node*& b) { return a->freq > b->freq; }
 	};
 	unordered_map<char, int> freqs;
 	unordered_map<char, string> codes;
 	Node* createNode(char ch, int freq, Node* left, Node* right);
-	Node* generateHuffmanTree();
 	void encode(Node* root, string code);
 public:
 	void getFrequencies(string text);
 	void updateFrequencies(char ch);
-	unordered_map<char, string> getCodes();
+	Node* generateHuffmanTree();
+	unordered_map<char, string> getCodes(Node* root);
 	Coding();
 	~Coding();
 };
