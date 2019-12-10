@@ -16,11 +16,9 @@ private:
 	string headBuffer;
 	void createHeader();
 	void writeTree(Coding::Node* root);
-	void addToBuffer(string& bits, FILE* outFile);
+	void addToBuffer(string& bits, FILE*& outFile);
+	const int maxSize = 256;
 public:
-	void SetInputFile(string inputFile);
-	void SetOutputFile(string outputFile);
-	//void setPseudoEOF(unordered_map<char, string> &codes);
 	void compress();
 	Compressor(string inputFileName, string outputFileName);
 	~Compressor();
