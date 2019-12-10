@@ -10,7 +10,7 @@ Coding::Node* Coding::createNode(char ch, int freq, Node* left, Node* right)
 
 	return node;
 }
-void Coding::getFrequencies(string text)
+void Coding::getFrequencies(string& text)
 {
 	for (int i = 0; i < text.length(); i++)
 	{
