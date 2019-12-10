@@ -1,22 +1,6 @@
 #include "Compressor.h"
 #include <iostream>
 
-void Compressor::SetInputFile(string inputFile)
-{
-	this->inputFile = inputFile;
-}
-void Compressor::SetOutputFile(string outputFile)
-{
-	if (outputFile == this->inputFile)
-	{
-		this->outputFile = this->inputFile;
-		this->outputFile.erase(this->outputFile.end() - 3, this->outputFile.end());
-		this->outputFile += "cprs";
-		return;
-	}
-	this->outputFile = outputFile;
-}
-
 void Compressor::writeTree(Coding::Node* root)
 {
 	if (root == NULL) return;
@@ -39,32 +23,35 @@ void Compressor::createHeader()
 	headBuffer += ' ';
 	writeTree(root);
 }
-void Compressor::addToBuffer(string& bits, FILE* outFile)
+void Compressor::addToBuffer(string& bits, FILE*& outFile)
 {
 	bitset<8> bs(bits, 0, 8, '0', '1');
 	bodyBuffer.push_back((char)bs.to_ulong());
 	bits.erase(0, 8);
-	if (bodyBuffer.size() > 256)
+	if (bodyBuffer.size() >= maxSize)
 	{
 		fwrite(&bodyBuffer[0], sizeof(char), bodyBuffer.size(), outFile);
-		bodyBuffer.resize(0);
+		bodyBuffer = "";
 	}
 }
 
 void Compressor::compress()
 {
 	Coding codeGenerator;
+
 	codeGenerator.getFrequencies(inputFile);
+
 	FILE* inFile = fopen(inputFile.c_str(), "rb");
 	if (inFile == NULL) throw "Cannot open file!";
 	fseek(inFile, 0, SEEK_END);
 	int fileSize = ftell(inFile);
+
 	fseek(inFile, 0, SEEK_SET);
-	string chars(256, '\0');
-	int nCharLeft = fileSize - ftell(inFile);
+	string chars(maxSize, '\0');
+	int nCharLeft = fileSize;
 	while (nCharLeft > 256)
 	{
-		fread(&chars[0], sizeof(char), 256, inFile);
+		fread(&chars[0], sizeof(char), maxSize, inFile);
 		codeGenerator.getFrequencies(chars);
 		nCharLeft = fileSize - ftell(inFile);
 	}
@@ -72,8 +59,10 @@ void Compressor::compress()
 	fread(&chars[0], sizeof(char), nCharLeft, inFile);
 	chars = chars.substr(0, nCharLeft);
 	codeGenerator.getFrequencies(chars);
+
 	root = codeGenerator.generateHuffmanTree();
 	unordered_map<char, string> codes = codeGenerator.getCodes(root);
+
 	FILE* outFile = fopen(outputFile.c_str(), "wb");
 	done = false;
 	//createHeader
@@ -90,21 +79,31 @@ void Compressor::compress()
 			addToBuffer(bits, outFile);
 		}
 	}
+
 	fseek(inFile, 0, SEEK_SET);
+	nCharLeft = fileSize;
+	string charsBuffer;
 	while (!done)
 	{
-		while (bits.size() < 8)
+		if (nCharLeft >= maxSize)
 		{
-			char cur_char;
-			fscanf(inFile, "%c", &cur_char);
-			if (feof(inFile))
-			{
-				done = true;
-				break;
-			}
-			bits += codes[cur_char];
+			charsBuffer = string(maxSize, '\0');
+			fread(&charsBuffer[0], sizeof(char), maxSize, inFile);
 		}
-		if (!done) addToBuffer(bits, outFile);
+		else
+		{
+			charsBuffer = string(nCharLeft, '\0');
+			fread(&charsBuffer[0], sizeof(char), nCharLeft, inFile);
+			done = true;
+		}
+		int bufferSize = charsBuffer.size();
+		for (int i = 0; i < bufferSize; i++)
+		{
+			bits += codes[charsBuffer.at(i)];
+			if (bits.size() >= 8)
+				addToBuffer(bits, outFile);
+		}
+		nCharLeft = fileSize - ftell(inFile);
 	}
 	fwrite(&bodyBuffer[0], sizeof(char), bodyBuffer.size(), outFile);
 	int endBlanks = 0;
