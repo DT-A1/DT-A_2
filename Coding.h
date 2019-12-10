@@ -23,7 +23,7 @@ private:
 	Node* createNode(char ch, int freq, Node* left, Node* right);
 	void encode(Node* root, string code);
 public:
-	void getFrequencies(string text);
+	void getFrequencies(string& text);
 	void updateFrequencies(char ch);
 	Node* generateHuffmanTree();
 	unordered_map<char, string> getCodes(Node* root);
