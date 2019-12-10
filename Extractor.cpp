@@ -1,18 +1,15 @@
 #include "Extractor.h"
 #include <iostream>
 
-void Extractor::setInputFileName(string input)
-{
-	this->inputFile = input;
-}
 void Extractor::readBits(FILE*& inFile)
 {
 	char ch;
-	while (bitsBuffer.size() < 256 && nCharLeft > 0)
+	while (nCharLeft > 0)
 	{
 		fread(&ch, sizeof(char), 1, inFile);
 		bitsBuffer += bitset<8>(ch).to_string();
 		nCharLeft = fileSize - ftell(inFile);
+		if (bitsBuffer.size() >= maxSize) break;
 	}
 	if (nCharLeft == 0 && !done)
 	{
@@ -95,7 +92,8 @@ void  Extractor::extract()
 		charsBuffer.push_back(nextChar);
 		if (charsBuffer.size() > 256)
 		{
-			fwrite(&charsBuffer[0], sizeof(char), 256, outFile);
+			fwrite(&charsBuffer[0], sizeof(char), maxSize, outFile);
+			charsBuffer = "";
 		}
 	}
 	if (done)
