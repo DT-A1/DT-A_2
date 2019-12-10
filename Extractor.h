@@ -26,6 +26,7 @@ private:
 	Node* readTree(FILE*& inFile);
 	char decodeBits(Node* codeTree, int index);
 	char getNextChar(FILE*& inFile);
+	const int maxSize = 256;
 public:
 	void extract();
 	Extractor(string inputFileName);
