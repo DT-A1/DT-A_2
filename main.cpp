@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <time.h>
 #include "Compressor.h"
 #include "Extractor.h"
 using namespace std;
@@ -7,6 +8,7 @@ using namespace std;
 void main()
 {
 	int choice;
+	clock_t start, finish;
 	while (1)
 	{
 		cout << "Compress file (0) or extrat file(1): ";
@@ -21,8 +23,10 @@ void main()
 			getline(cin, cprFileName);
 			Compressor cpr(fileName, cprFileName);
 			try {
+				start = clock();
 				cpr.compress();
-				cout << "Compression done!" << endl;
+				finish = clock();
+				cout << "Compression done! Time: " << finish - start << endl;
 			}
 			catch (const char* err)
 			{
@@ -37,8 +41,10 @@ void main()
 			getline(cin, fileName);
 			Extractor ext(fileName);
 			try {
+				start = clock();
 				ext.extract();
-				cout << "Extraction done!" << endl;
+				finish = clock();
+				cout << "Extraction done! Time: " << finish - start << endl;
 			}
 			catch (const char* err)
 			{
