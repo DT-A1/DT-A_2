@@ -18,15 +18,15 @@ private:
 	{
 		bool operator() (Node*& a, Node*& b) { return a->freq > b->freq; }
 	};
-	unordered_map<char, int> freqs;
-	unordered_map<char, string> codes;
+	vector<int> frequencies;
+	vector<string> codes;
 	Node* createNode(char ch, int freq, Node* left, Node* right);
 	void encode(Node* root, string code);
 public:
 	void getFrequencies(string& text);
 	void updateFrequencies(char ch);
 	Node* generateHuffmanTree();
-	unordered_map<char, string> getCodes(Node* root);
+	vector<string> getCodes(Node* root);
 	Coding();
 	~Coding();
 };
