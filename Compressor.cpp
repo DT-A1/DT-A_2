@@ -4,7 +4,7 @@
 void Compressor::writeTree(Coding::Node* root)
 {
 	if (root == NULL) return;
-	if (root->left == NULL && root->right == NULL)
+	if (root->left == NULL)
 	{
 		headBuffer.push_back('0');
 		headBuffer.push_back(root->ch);
@@ -53,7 +53,7 @@ void Compressor::compress()
 	{
 		fread(&chars[0], sizeof(char), maxSize, inFile);
 		codeGenerator.getFrequencies(chars);
-		nCharLeft = fileSize - ftell(inFile);
+		nCharLeft -= maxSize;
 	}
 	chars = string(nCharLeft, '\0');
 	fread(&chars[0], sizeof(char), nCharLeft, inFile);
@@ -61,19 +61,18 @@ void Compressor::compress()
 	codeGenerator.getFrequencies(chars);
 
 	root = codeGenerator.generateHuffmanTree();
-	unordered_map<char, string> codes = codeGenerator.getCodes(root);
+	vector<string> codes = codeGenerator.getCodes(root);
 
 	FILE* outFile = fopen(outputFile.c_str(), "wb");
 	done = false;
 	//createHeader
-	//fprintf(outFile, "  %d ", inputFile.length());
 	createHeader();
 	fwrite(&headBuffer[0], sizeof(char), headBuffer.size(), outFile);
 	//CreateBody
 	string bits = "";
 	for (int i = 0; i < inputFile.length(); i++)
 	{
-		bits += codes[inputFile[i]];
+		bits += codes[(unsigned char)inputFile[i]];
 		if (bits.size() > 8)
 		{
 			addToBuffer(bits, outFile);
@@ -99,7 +98,7 @@ void Compressor::compress()
 		int bufferSize = charsBuffer.size();
 		for (int i = 0; i < bufferSize; i++)
 		{
-			bits += codes[charsBuffer.at(i)];
+			bits += codes[(unsigned char)charsBuffer[i]];
 			if (bits.size() >= 8)
 				addToBuffer(bits, outFile);
 		}
