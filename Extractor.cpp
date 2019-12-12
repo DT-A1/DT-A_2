@@ -1,25 +1,33 @@
 #include "Extractor.h"
 #include <iostream>
 
-void Extractor::readBits(FILE*& inFile)
+void Extractor::readBits(FILE*& inFile, int& i)
 {
-	char ch;
-	while (nCharLeft > 0)
+	if (i >= fileBuffer.size())
 	{
-		fread(&ch, sizeof(char), 1, inFile);
-		bitsBuffer += bitset<8>(ch).to_string();
-		nCharLeft = fileSize - ftell(inFile);
-		if (bitsBuffer.size() >= maxSize) break;
+		if (nCharLeft >= maxSize)
+		{
+			fread(&fileBuffer[0], sizeof(char), maxSize, inFile);
+		}
+		else
+		{
+			fread(&fileBuffer[0], sizeof(char), nCharLeft, inFile);
+			fileBuffer.resize(nCharLeft);
+			done = true;
+		}
+		nCharLeft -= fileBuffer.size();
+		i = 0;
 	}
-	if (nCharLeft == 0 && !done)
+	while (bitsBuffer.size() < maxSize && i < fileBuffer.size())
 	{
-		bitsBuffer.erase(bitsBuffer.end() - endBlanks, bitsBuffer.end());
-		done = true;
+		bitsBuffer += bitset<8>(fileBuffer[i]).to_string();
+		++i;
+		if (i == fileBuffer.size() && done) bitsBuffer.erase(bitsBuffer.end() - endBlanks, bitsBuffer.end());
 	}
 }
 char Extractor::decodeBits(Node* codeTree, int index)
 {
-	if (codeTree->left == NULL && codeTree->right == NULL)
+	if (codeTree->left == NULL)
 	{
 		bitsBuffer.erase(0, index + 1);
 		return codeTree->ch;
@@ -34,18 +42,18 @@ char Extractor::decodeBits(Node* codeTree, int index)
 		return decodeBits(codeTree->right, index);
 	}
 }
-char Extractor::getNextChar(FILE*& inFile)
+char Extractor::getNextChar(FILE* inFile, int& i)
 {
-	readBits(inFile);
+	readBits(inFile, i);
 	int index = -1;
 	return decodeBits(codeTree, index);	
 }
-string Extractor::readFileName(FILE*& inFile)
+string Extractor::readFileName(FILE*& inFile, int& i)
 {
 	string result = "";
 	while (result.size() < nameLength)
 	{
-		result += getNextChar(inFile);
+		result += getNextChar(inFile, i);
 	}
 	return result;
 }
@@ -83,14 +91,18 @@ void  Extractor::extract()
 	fgetc(inFile);
 	codeTree = readTree(inFile);
 	//read original file's name;
-	outputFile = readFileName(inFile);
+	fileBuffer = string(maxSize, '\0');
+	nCharLeft -= ftell(inFile);
+	int i = maxSize;
+	outputFile = readFileName(inFile, i);
 	FILE* outFile = fopen(outputFile.c_str(), "wb");
 	//read file's content;
+	char nextChar;
 	while (bitsBuffer.size() > 0)
 	{
-		char nextChar = getNextChar(inFile);
+		nextChar = getNextChar(inFile, i);
 		charsBuffer.push_back(nextChar);
-		if (charsBuffer.size() > 256)
+		if (charsBuffer.size() >= maxSize)
 		{
 			fwrite(&charsBuffer[0], sizeof(char), maxSize, outFile);
 			charsBuffer = "";
