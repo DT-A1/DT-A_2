@@ -21,11 +21,12 @@ private:
 	int nCharLeft;
 	string bitsBuffer;
 	string charsBuffer;
-	void readBits(FILE*& inFile);
-	string readFileName(FILE*& inFile);
+	string fileBuffer;
+	void readBits(FILE*& inFile, int& i);
+	string readFileName(FILE*& inFile, int& i);
 	Node* readTree(FILE*& inFile);
 	char decodeBits(Node* codeTree, int index);
-	char getNextChar(FILE*& inFile);
+	char getNextChar(FILE* inFile, int& i);
 	const int maxSize = 256;
 public:
 	void extract();
