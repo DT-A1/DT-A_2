@@ -14,19 +14,20 @@ void Coding::getFrequencies(string& text)
 {
 	for (int i = 0; i < text.length(); i++)
 	{
-		freqs[text[i]]++;
+		++frequencies[(unsigned char)text[i]];
 	}
 }
 void Coding::updateFrequencies(char ch)
 {
-	++freqs[ch];
+	++frequencies[ch];
 }
 Coding::Node* Coding::generateHuffmanTree()
 {
 	priority_queue<Node*, vector<Node*>, cmp> pQueue;
-	for (auto i = freqs.begin(); i != freqs.end(); i++)
+	for (int i = 0; i < 256; ++i)
 	{
-		pQueue.push(createNode(i->first, i->second, NULL, NULL));
+		if (frequencies[i] > 0)
+			pQueue.push(createNode((char)i, frequencies[i], NULL, NULL));
 	}
 
 	while (pQueue.size() != 1)
@@ -45,12 +46,12 @@ Coding::Node* Coding::generateHuffmanTree()
 void Coding::encode(Node* root, string code)
 {
 	if (root == NULL) return;
-	if (root->left == NULL && root->right == NULL) codes[root->ch] = code;
+	if (root->left == NULL && root->right == NULL) codes[(unsigned char)root->ch] = code;
 	encode(root->left, code + "0");
 	encode(root->right, code + "1");
 }
 
-unordered_map<char, string> Coding::getCodes(Node* root)
+vector<string> Coding::getCodes(Node* root)
 {
 	encode(root, "");
 
@@ -59,6 +60,8 @@ unordered_map<char, string> Coding::getCodes(Node* root)
 
 Coding::Coding()
 {
+	frequencies = vector<int>(256, 0);
+	codes = vector<string>(256, "");
 }
 
 
