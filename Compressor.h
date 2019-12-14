@@ -1,14 +1,16 @@
 #pragma once
 #include "Coding.h"
 #include <string>
-#include <unordered_map>
 #include <fstream>
 #include <bitset>
+#include <direct.h>
+#include "dirent.h"
 using namespace std;
 class Compressor
 {
 private:
 	Coding::Node* root;
+	string filePath;
 	string inputFile;
 	string outputFile;
 	bool done;
