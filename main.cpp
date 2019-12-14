@@ -11,7 +11,7 @@ void main()
 	clock_t start, finish;
 	while (1)
 	{
-		cout << "Compress file (0) or extrat file(1): ";
+		cout << "Compress file (0) or extrat file(1) or quit(-1): ";
 		cin >> choice;
 		if (choice == 0)
 		{
@@ -33,13 +33,16 @@ void main()
 				cout << err << endl;
 			}
 		}
-		else
+		else if (choice == 1)
 		{
 			string fileName;
 			cout << "Input file's name: ";
 			cin.ignore();
 			getline(cin, fileName);
-			Extractor ext(fileName);
+			cout << "Input destination directory: ";
+			string desDir;
+			getline(cin, desDir);
+			Extractor ext(fileName, desDir);
 			try {
 				start = clock();
 				ext.extract();
@@ -50,6 +53,10 @@ void main()
 			{
 				cout << err << endl;
 			}
+		}
+		else
+		{
+			break;
 		}
 	}
 	cin.get();
