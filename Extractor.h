@@ -12,6 +12,7 @@ private:
 		Node* right;
 	};
 	Node* codeTree;
+	string desDir;
 	string inputFile;
 	string outputFile;
 	int endBlanks;
@@ -30,7 +31,7 @@ private:
 	const int maxSize = 256;
 public:
 	void extract();
-	Extractor(string inputFileName);
+	Extractor(string inputFileName, string desDirectory);
 	~Extractor();
 };
 
