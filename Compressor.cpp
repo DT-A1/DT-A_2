@@ -19,7 +19,7 @@ void Compressor::writeTree(Coding::Node* root)
 void Compressor::createHeader()
 {
 	headBuffer += ' ';
-	headBuffer += to_string(inputFile.size());
+	headBuffer += to_string(inputFile.size() - filePath.size() - 1);
 	headBuffer += ' ';
 	writeTree(root);
 }
@@ -39,7 +39,8 @@ void Compressor::compress()
 {
 	Coding codeGenerator;
 
-	codeGenerator.getFrequencies(inputFile);
+	string onlyFileName = inputFile.substr(filePath.size() + 1, inputFile.size());
+	codeGenerator.getFrequencies(onlyFileName);
 
 	FILE* inFile = fopen(inputFile.c_str(), "rb");
 	if (inFile == NULL) throw "Cannot open file!";
@@ -70,9 +71,9 @@ void Compressor::compress()
 	fwrite(&headBuffer[0], sizeof(char), headBuffer.size(), outFile);
 	//CreateBody
 	string bits = "";
-	for (int i = 0; i < inputFile.length(); i++)
+	for (int i = 0; i < onlyFileName.length(); i++)
 	{
-		bits += codes[(unsigned char)inputFile[i]];
+		bits += codes[(unsigned char)onlyFileName[i]];
 		if (bits.size() > 8)
 		{
 			addToBuffer(bits, outFile);
@@ -125,12 +126,18 @@ void Compressor::compress()
 
 Compressor::Compressor(string inputFileName, string outputFileName)
 {
+	int pos = inputFileName.rfind("\\");
+	if (pos != inputFileName.npos)
+	{
+		filePath = inputFileName.substr(0, pos);
+	}
 	inputFile = inputFileName;
 	outputFile = outputFileName;
-	if (outputFile == inputFileName)
+	if (outputFile.size() < 4 || outputFile.substr(outputFile.length() - 5, outputFile.length() - 1) != ".cprs")
 	{
 		outputFile += ".cprs";
 	}
+	outputFile = filePath + "\\" + outputFile;
 	done = false;
 }
 
