@@ -95,7 +95,9 @@ void  Extractor::extract()
 	nCharLeft -= ftell(inFile);
 	int i = maxSize;
 	outputFile = readFileName(inFile, i);
+	outputFile = desDir + "\\" + outputFile;
 	FILE* outFile = fopen(outputFile.c_str(), "wb");
+	if (outFile == NULL) throw "Cannot open destination file.";
 	//read file's content;
 	char nextChar;
 	while (bitsBuffer.size() > 0)
@@ -116,8 +118,9 @@ void  Extractor::extract()
 	fclose(outFile);
 }
 
-Extractor::Extractor(string inputFileName)
+Extractor::Extractor(string inputFileName, string desDirectory)
 {
+	desDir = desDirectory;
 	inputFile = inputFileName;
 	done = false;
 
